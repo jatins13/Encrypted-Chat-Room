@@ -1,5 +1,5 @@
 # import tkinter module 
-from tkinter import 
+from tkinter import *
   
 # import other necessery modules 
 import random 
