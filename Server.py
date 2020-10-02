@@ -53,8 +53,8 @@ def clientthread(conn, addr):
                     terminal"""
                     print("<" + addr[0] + "> " + message.decode()) 
   
-                    # Calls broadcast function to send message to all 
-                    message_to_send = "<" + addr[0] + "> " + message 
+                    # Calls broadcast function to send message to all
+                    message_to_send = "<" + addr[0] + "> " + message.decode() 
                     broadcast(message_to_send.encode(), conn) 
   
                 else: 
@@ -63,6 +63,7 @@ def clientthread(conn, addr):
                     remove(conn) 
   
             except: 
+                print("Couldn't broadcast")
                 continue
   
 """Using the below function, we broadcast the message to all 
