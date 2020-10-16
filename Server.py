@@ -38,10 +38,40 @@ server.listen(100)
   
 list_of_clients = [] 
   
+
+def encoder(key, clear): 
+    enc = [] 
+      
+    for i in range(len(clear)): 
+        key_c = key[i % len(key)] 
+        enc_c = chr((ord(clear[i]) +
+                     ord(key_c)) % 256) 
+                       
+        enc.append(enc_c) 
+       
+    stri=""
+    stri = stri.join(enc)    
+    return stri
+
+# Function to decode 
+def decoder(key, enc): 
+    dec = [] 
+      
+    
+    for i in range(len(enc)): 
+        key_c = key[i % len(key)] 
+        dec_c = chr((256 + ord(enc[i]) -
+                           ord(key_c)) % 256) 
+                             
+        dec.append(dec_c) 
+    return "".join(dec) 
+  
 def clientthread(conn, addr): 
   
     # sends a message to the client whose user object is conn 
-    conn.send("Welcome to this chatroom!".encode()) 
+    msg = "Welcome to this chatroom!"
+    msg = encoder("vigenerecipher",msg)
+    conn.send(msg.encode()) 
   
     while True: 
             try: 
@@ -51,11 +81,14 @@ def clientthread(conn, addr):
                     """prints the message and address of the 
                     user who just sent the message on the server 
                     terminal"""
-                    print("<" + addr[0] + "> " + message.decode()) 
+                    message = message.decode()
+                    message = decoder("vigenerecipher",message)
+                    print("<" + addr[0] + "> " + message) 
   
                     # Calls broadcast function to send message to all
-                    message_to_send = "<" + addr[0] + "> " + message.decode() 
-                    broadcast(message_to_send.encode(), conn) 
+                    message = "<" + addr[0] + "> " + message
+                    message = encoder("vigenerecipher",message)
+                    broadcast(message.encode(), conn) 
   
                 else: 
                     """message may have no content if the connection 
