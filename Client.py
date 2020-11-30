@@ -5,13 +5,16 @@ import sys
 import base64 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-if len(sys.argv) != 3: 
-    print("Correct usage: script, IP address, port number")
+if len(sys.argv) != 4: 
+    print("Correct usage: script, IP address, port number, user ID")
     exit() 
 IP_address = str(sys.argv[1]) 
 Port = int(sys.argv[2]) 
 server.connect((IP_address, Port)) 
-
+userId = str(sys.argv[3])
+server.send(userId.encode())
+server_resp = server.recv(1024)
+server_resp = server_resp.decode()
 # Vigenère cipher 
   
 # Function to encode 

@@ -3,7 +3,13 @@ import socket
 import select 
 import sys 
 from _thread import *
-  
+import mysql.connector
+
+cnx = mysql.connector.connect(user = 'root',password = 'MySql134*',
+                            host = 'localhost', database='chatroom', auth_plugin = 'mysql_native_password')
+    
+cursor = cnx.cursor()
+
 """The first argument AF_INET is the address domain of the 
 socket. This is used when we have an Internet Domain with 
 any two hosts The second argument is the type of socket. 
@@ -11,8 +17,7 @@ SOCK_STREAM means that data or characters are read in
 a continuous flow."""
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
-  
-# checks whether sufficient arguments have been provided 
+
 if len(sys.argv) != 3: 
     print ("Correct usage: script, IP address, port number")
     exit() 
@@ -23,17 +28,9 @@ IP_address = str(sys.argv[1])
 # takes second argument from command prompt as port number 
 Port = int(sys.argv[2]) 
   
-""" 
-binds the server to an entered IP address and at the 
-specified port number. 
-The client must be aware of these parameters 
-"""
+#Binding the socket to the IP address and port number
 server.bind((IP_address, Port)) 
   
-""" 
-listens for 100 active connections. This number can be 
-increased as per convenience. 
-"""
 server.listen(100) 
   
 list_of_clients = [] 
@@ -109,7 +106,7 @@ def broadcast(message, connection):
                 clients.send(message) 
             except: 
                 clients.close() 
-  
+    
                 # if the link is broken, we remove the client 
                 remove(clients) 
   
@@ -127,17 +124,48 @@ while True:
     which contains the IP address of the client that just  
     connected"""
     conn, addr = server.accept() 
-  
-    """Maintains a list of clients for ease of broadcasting 
-    a message to all available people in the chatroom"""
-    list_of_clients.append(conn) 
-  
-    # prints the address of the user that just connected 
-    print (addr[0] + " connected")
-  
-    # creates and individual thread for every user  
-    # that connects 
-    start_new_thread(clientthread,(conn,addr))     
-  
+    user_id = conn.recv(1024)
+    user_id = int(user_id.decode())
+    passe = ""
+    query_name = ("SELECT * FROM chatroom_logins "
+                "WHERE user_id = %s ")
+    cursor.execute(query_name,(user_id,))
+    userName = ""
+    for(user_id,name,password) in cursor:
+        # print("Hello {}, enter your password to enter IMF".format(name))
+        passe = password
+        userName = name
+    if(len(userName)>0):
+        server_resp = "Valid"
+        server_resp = server_resp.encode()
+        conn.send(server_resp)
+        passq = input()
+        passq = str(passq)
+        if(passq != passe):
+            server_resp = "Password Incorrect"
+            server_resp = server_resp.encode()
+            conn.send(server_resp)
+            conn.close()
+        else:   
+            server_resp = "Welcome to the chatroom!"
+            server_resp = server_resp.encode()
+            conn.send(server_resp)
+            """Maintains a list of clients for ease of broadcasting 
+            a message to all available people in the chatroom"""
+            list_of_clients.append(conn) 
+        
+            # prints the address of the user that just connected 
+            print (addr[0] + " connected")
+        
+            # creates and individual thread for every user  
+            # that connects 
+            start_new_thread(clientthread,(conn,addr))  
+    else:    
+        server_resp = "Invalid"
+        server_resp = server_resp.encode()
+        conn.send(server_resp)
+       
+cursor.close()
+cnx.close()
 conn.close() 
 server.close() 
