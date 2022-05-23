@@ -2,21 +2,7 @@
 import socket 
 import select 
 import sys 
-import base64 
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-if len(sys.argv) != 4: 
-    print("Correct usage: script, IP address, port number, user ID")
-    exit() 
-IP_address = str(sys.argv[1]) 
-Port = int(sys.argv[2]) 
-server.connect((IP_address, Port)) 
-userId = str(sys.argv[3])
-server.send(userId.encode())
-server_resp = server.recv(1024)
-server_resp = server_resp.decode()
-# Vigenère cipher 
-  
 # Function to encode 
 def encoder(key, clear): 
     enc = [] 
@@ -43,6 +29,22 @@ def decoder(key, enc):
                              
         dec.append(dec_c) 
     return "".join(dec) 
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+if len(sys.argv) != 4: 
+    print("Correct usage: script, IP address, port number, user ID")
+    exit() 
+IP_address = str(sys.argv[1]) 
+Port = int(sys.argv[2]) 
+server.connect((IP_address, Port)) 
+userId = str(sys.argv[3])
+server.send(userId.encode())
+server_resp = server.recv(1024)
+server_resp = server_resp.decode()
+print(decoder("vigenerecipher",server_resp)) 
+# Vigenère cipher 
+  
+
   
 while True: 
   
@@ -58,6 +60,7 @@ while True:
     below.If the user wants to send a message, the else 
     condition will evaluate as true"""
     read_sockets,write_socket, error_socket = select.select(sockets_list,[],[]) 
+    """The above line waits for I/O in all three """
   
     for socks in read_sockets: 
         if socks == server: 

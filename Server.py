@@ -63,7 +63,7 @@ def decoder(key, enc):
         dec.append(dec_c) 
     return "".join(dec) 
   
-def clientthread(conn, addr): 
+def clientthread(conn, addr, userName): 
   
     # sends a message to the client whose user object is conn 
     msg = "Welcome to this chatroom!"
@@ -80,10 +80,10 @@ def clientthread(conn, addr):
                     terminal"""
                     message = message.decode()
                     message = decoder("vigenerecipher",message)
-                    print("<" + addr[0] + "> " + message) 
+                    print("<" + userName + "> " + message) 
   
                     # Calls broadcast function to send message to all
-                    message = "<" + addr[0] + "> " + message
+                    message = "<" + userName + "> " + message
                     message = encoder("vigenerecipher",message)
                     broadcast(message.encode(), conn) 
   
@@ -136,7 +136,7 @@ while True:
         passe = password
         userName = name
     if(len(userName)>0):
-        server_resp = "Valid"
+        server_resp = "Please enter your password."
         server_resp = server_resp.encode()
         conn.send(server_resp)
         passq = input()
@@ -159,9 +159,9 @@ while True:
         
             # creates and individual thread for every user  
             # that connects 
-            start_new_thread(clientthread,(conn,addr))  
+            start_new_thread(clientthread,(conn,addr, userName))  
     else:    
-        server_resp = "Invalid"
+        server_resp = "Invalid user name"
         server_resp = server_resp.encode()
         conn.send(server_resp)
        
